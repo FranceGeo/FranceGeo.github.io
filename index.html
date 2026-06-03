@@ -1,3 +1,1842 @@
-<doctype>
-</doctype>
-</write> 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FranceGuessr</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
+    }
+
+    body{
+      overflow:hidden;
+      background:black;
+    }
+
+    #street-view{
+      width:100vw;
+      height:100vh;
+    }
+
+    /* MAP */
+
+    #map-container{
+
+      position:absolute;
+
+      bottom:20px;
+      right:20px;
+
+      width:320px;
+      height:220px;
+
+      border-radius:16px;
+
+      overflow:hidden;
+
+      z-index:1000;
+
+      transition:all 0.4s ease;
+
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
+
+    }
+
+    /* GRANDE MAP */
+
+    #map-container.expanded{
+
+      width:650px;
+      height:450px;
+
+    }
+
+    /* FULLSCREEN */
+
+    #map-container.fullscreen{
+
+      width:100vw;
+      height:100vh;
+
+      top:0;
+      left:0;
+      right:0;
+      bottom:0;
+
+      border-radius:0;
+
+    }
+
+    #map{
+      width:100%;
+      height:100%;
+    }
+
+    /* CONTROLS */
+
+    .controls{
+
+      position:absolute;
+
+      top:10px;
+      left:10px;
+
+      z-index:3000;
+
+      display:flex;
+      gap:10px;
+
+    }
+
+    button{
+
+      border:none;
+
+      padding:10px 15px;
+
+      border-radius:10px;
+
+      cursor:pointer;
+
+      font-weight:bold;
+
+      background:#111;
+
+      color:white;
+
+      font-size:16px;
+
+    }
+
+    button:hover{
+      background:#222;
+    }
+
+    /* RETOUR POSITION */
+
+    #reset-position-btn{
+
+      position:absolute;
+
+      bottom:20px;
+      left:20px;
+
+      z-index:4000;
+
+      width:55px;
+      height:55px;
+
+      border:none;
+
+      border-radius:50%;
+
+      background:#111;
+
+      color:white;
+
+      font-size:28px;
+
+      cursor:pointer;
+
+      display:flex;
+
+      align-items:center;
+      justify-content:center;
+
+      box-shadow:0 0 15px rgba(0,0,0,0.4);
+
+    }
+
+    #reset-position-btn:hover{
+      background:#222;
+    }
+
+    /* RESULT BOX */
+
+    #result-box{
+
+      position:absolute;
+
+      bottom:30px;
+      left:50%;
+
+      transform:translateX(-50%);
+
+      width:700px;
+      max-width:90%;
+
+      background:rgba(30,30,30,0.95);
+
+      border-radius:20px;
+
+      padding:40px 25px;
+
+      z-index:5000;
+
+      display:none;
+
+      color:white;
+
+      text-align:center;
+
+      box-shadow:0 0 25px rgba(0,0,0,0.5);
+
+    }
+
+    #distance-text{
+
+      font-size:40px;
+      font-weight:bold;
+
+      margin-bottom:20px;
+
+    }
+
+    #continue-btn{
+
+      width:100%;
+
+      padding:18px;
+
+      font-size:24px;
+
+      border-radius:15px;
+
+      background:#008000;
+
+      color:white;
+
+      border:none;
+
+      cursor:pointer;
+
+      font-weight:bold;
+
+    }
+
+    #continue-btn:hover{
+      background:#006400;
+    }
+
+/* BOUTON MULTIJOUEUR */
+
+#multiplayer-btn{
+
+  position:absolute;
+
+  bottom:90px;
+  left:20px;
+
+  width:55px;
+  height:55px;
+
+  border:none;
+
+  border-radius:50%;
+
+  background:#111;
+
+  color:white;
+
+  font-size:28px;
+
+  cursor:pointer;
+
+  z-index:6000;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:0 0 15px rgba(0,0,0,0.4);
+
+}
+
+#multiplayer-btn:hover{
+  background:#222;
+}
+
+/* MENU MULTIJOUEUR */
+
+#multiplayer-menu{
+
+  position:absolute;
+
+  top:0;
+  left:0;
+
+  width:100vw;
+  height:100vh;
+
+  background:rgba(0,0,0,0.75);
+
+  z-index:7000;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+}
+
+#multiplayer-content{
+
+  width:400px;
+  max-width:90%;
+
+  background:white;
+
+  border-radius:20px;
+
+  padding:40px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:35px;
+
+  position:relative;
+
+}
+
+#multiplayer-home{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:25px;
+
+}
+.multi-btn{
+
+  width:100%;
+
+  padding:20px;
+
+  font-size:22px;
+
+  border-radius:14px;
+
+  background:white;
+
+  color:black;
+
+  border:2px solid black;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+}
+    
+.multi-btn:hover,
+.multi-btn:active,
+.multi-btn:focus{
+
+  background:white !important;
+
+  color:black !important;
+
+  opacity:1 !important;
+
+}
+  .menu-btn{
+
+  background:#008000 !important;
+
+  color:white !important;
+
+  border:none !important;
+
+}
+
+.menu-btn:hover,
+.menu-btn:active,
+.menu-btn:focus{
+
+  background:#006400 !important;
+
+  color:white !important;
+
+}
+
+/* CROIX FERMER */
+
+#close-multiplayer{
+
+  position:absolute;
+
+  top:20px;
+  right:20px;
+
+  width:50px;
+  height:50px;
+
+  border:none;
+
+  border-radius:12px;
+
+  background:white;
+
+  color:white;
+
+  font-size:22px;
+
+  cursor:pointer;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  padding:0;
+
+}
+
+#room-code{
+
+  font-size:42px;
+
+  font-weight:bold;
+
+  color:black;
+
+  text-align:center;
+
+  margin-bottom:25px;
+
+}
+
+#players-list{
+
+  margin-top:20px;
+
+  color:black;
+
+  font-size:18px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:10px;
+
+}
+
+.player-item{
+
+  background:#grey;
+
+  padding:12px;
+
+  border-radius:10px;
+
+}
+
+#start-game-btn{
+
+  background:#008000 !important;
+
+  color:white !important;
+
+  border:none !important;
+
+}
+
+#start-game-btn:hover,
+#start-game-btn:active,
+#start-game-btn:focus{
+
+  background:#006400 !important;
+
+  color:white !important;
+
+}
+    #leave-room-btn{
+
+  background:#e74c3c !important;
+
+  color:white !important;
+
+  border:none !important;
+
+}
+
+#leave-room-btn:hover,
+#leave-room-btn:active,
+#leave-room-btn:focus{
+
+  background:#c0392b !important;
+
+  color:white !important;
+
+}
+
+    .leaflet-control-zoom,
+.leaflet-control-attribution,
+.leaflet-control-container .leaflet-control {
+  display: none !important;
+}
+    .gm-style button,
+.gm-bundled-control,
+.gm-fullscreen-control {
+  display: none !important;
+}
+
+    #close-icon{
+
+  position:relative;
+
+  left:1px;
+
+  top:0.5px;
+
+}
+  </style>
+</head>
+<body>
+
+<!-- STREET VIEW -->
+<div id="street-view"></div>
+
+<!-- RESULT -->
+<div id="result-box">
+
+  <div id="distance-text">
+    Bravo : 0 km
+  </div>
+
+  <button id="continue-btn" onclick="nextRound()">
+    Continuer
+  </button>
+
+</div>
+
+<!-- MAP -->
+<div id="map-container">
+
+  <div class="controls" id="controls">
+
+    <button onclick="toggleMap()">
+      🗺️
+    </button>
+
+    <button onclick="validateGuess()">
+      Valider
+    </button>
+
+  </div>
+
+  <div id="map"></div>
+
+</div>
+
+<!-- RETOUR POSITION -->
+<button id="reset-position-btn"
+onclick="resetPosition()">
+  ↩️
+</button>
+
+<!-- MULTIJOUEUR -->
+<button id="multiplayer-btn" onclick="openMultiplayerMenu()">
+  👨🏼‍🤝‍👨🏽
+</button>
+
+<div id="multiplayer-menu">
+
+<button id="close-multiplayer"
+onclick="closeMultiplayerMenu()">
+  <span id="close-icon">✖</span>
+</button>
+
+  <div id="multiplayer-content">
+
+  <!-- MENU NORMAL -->
+  <div id="multiplayer-home">
+
+<button class="multi-btn menu-btn"
+onclick="createRoom()">
+  Créer une partie
+</button>
+
+<button class="multi-btn menu-btn"
+onclick="joinRoom()">
+  Rejoindre une partie
+</button>
+
+  </div>
+
+  <!-- LOBBY -->
+  <div id="lobby-screen"
+  style="display:none;">
+
+    <div id="room-code">
+      CODE
+    </div>
+
+<button
+id="start-game-btn"
+class="multi-btn"
+onclick="startMultiplayerGame()">
+
+  Commencer
+
+</button>
+
+<button
+id="leave-room-btn"
+class="multi-btn"
+onclick="leaveRoom()"
+style="
+display:none;
+background:#e74c3c;
+color:white;
+">
+
+  Quitter
+
+</button>
+
+    <div id="players-list">
+
+    </div>
+
+  </div>
+
+<div style="
+margin-top:25px;
+color:#black;
+font-size:15px;
+text-align:center;
+line-height:1.5;
+">
+
+  Créez une équipe et tentez ensemble
+  de trouver où vous êtes en France 🇫🇷.
+  Une partie dure 3 rounds.
+  Bonne chance.
+
+</div>
+
+</div>
+
+</div>
+
+<!-- LEAFLET -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<!-- GOOGLE -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ip7Tdn0LQn2XXeIh1K5ksvuIMuwjV50&libraries=geometry"></script>
+
+<script>
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDjup1pMAENznn129njn4qnqoTasaN9-n8",
+
+  authDomain:
+  "franceguessr-d1706.firebaseapp.com",
+
+  databaseURL:
+  "https://franceguessr-d1706-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "franceguessr-d1706",
+
+  storageBucket:
+  "franceguessr-d1706.firebasestorage.app",
+
+  messagingSenderId:
+  "232820209634",
+
+  appId:
+  "1:232820209634:web:8326a8f01fcbadc18a6bbb"
+
+};
+
+firebase.initializeApp(
+  firebaseConfig
+);
+
+const db =
+  firebase.database();
+
+/* STREET VIEW SERVICE */
+
+const streetViewService =
+  new google.maps.StreetViewService();
+
+let map;
+let playerMarker;
+let realMarker;
+let line;
+let multiplayerLayers = [];
+
+let panorama;
+
+let selectedLatLng = null;
+let realPosition = null;
+
+let roundEnded = false;
+
+let currentRoom = null;
+
+let playerName = null;
+
+let isHost = false;
+
+let multiplayer = false;
+
+let validatedPlayers = {};
+
+let hasValidated = false;
+
+let resultShown = false;
+
+let lastLocationKey = null;
+
+let currentRound = 1;
+
+const maxRounds = 3;
+
+const mapContainer =
+  document.getElementById("map-container");
+
+const resultBox =
+  document.getElementById("result-box");
+
+const distanceText =
+  document.getElementById("distance-text");
+
+/* LIMITES FRANCE */
+
+const franceBounds = L.latLngBounds(
+  L.latLng(41.0, -8.5),
+  L.latLng(51.8, 10.0)
+);
+
+/* RANDOM LOCATION */
+
+async function randomLocation(){
+
+  return new Promise((resolve) => {
+
+    function tryLocation(){
+
+      const lat =
+        Math.random() *
+        (50.5 - 42.3)
+        + 42.3;
+
+      const lng =
+        Math.random() *
+        (7.8 - (-4.9))
+        + (-4.9);
+
+      const location = {
+        lat: lat,
+        lng: lng
+      };
+
+      streetViewService.getPanorama({
+
+        location: location,
+
+        radius: 5000,
+
+        source:
+          google.maps.StreetViewSource.OUTDOOR
+
+      }, (data, status) => {
+
+        if(
+          status === 'OK' &&
+          data &&
+          data.location &&
+          data.location.latLng
+        ){
+
+          const panoLat =
+            data.location.latLng.lat();
+
+          const panoLng =
+            data.location.latLng.lng();
+
+          if(
+
+            panoLat >= 42.3 &&
+            panoLat <= 50.5 &&
+
+            panoLng >= -4.9 &&
+            panoLng <= 7.8
+
+          ){
+
+            resolve({
+
+              lat: panoLat,
+
+              lng: panoLng
+
+            });
+
+          } else {
+
+            tryLocation();
+
+          }
+
+        } else {
+
+          tryLocation();
+
+        }
+
+      });
+
+    }
+
+    tryLocation();
+
+  });
+
+}
+
+function askPlayerName(){
+
+  if(playerName) return;
+
+  playerName = prompt(
+    "Ton pseudo"
+  );
+
+  if(!playerName || playerName.trim() === ""){
+
+    playerName = "Joueur";
+
+  }
+
+}
+
+function generateRoomCode(){
+
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  let code = "";
+
+  for(let i = 0; i < 6; i++){
+
+    code += chars.charAt(
+      Math.floor(
+        Math.random() * chars.length
+      )
+    );
+
+  }
+
+  return code;
+
+}
+
+/* MAP SIZE */
+
+function toggleMap(){
+
+  if(
+    !mapContainer.classList.contains(
+      "fullscreen"
+    )
+  ){
+
+    mapContainer.classList.toggle(
+      "expanded"
+    );
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 400);
+
+  }
+
+}
+
+/* INIT */
+
+function initGame(){
+
+  map = L.map('map', {
+
+  zoomControl: false,
+
+  maxBounds: franceBounds,
+
+  maxBoundsViscosity: 1.0,
+
+  minZoom: 5
+
+  }).setView(
+    [46.603354, 1.888334],
+    6
+  );
+
+  L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      attribution:
+      '&copy; OpenStreetMap contributors'
+    }
+  ).addTo(map);
+
+  map.on('click', function(e){
+
+    // EMPÊCHE CHANGEMENT
+    // APRÈS VALIDATION
+
+    if(roundEnded || hasValidated){
+    return;
+  }
+
+    selectedLatLng = e.latlng;
+
+    if(playerMarker){
+      map.removeLayer(playerMarker);
+    }
+
+    playerMarker =
+      L.marker(e.latlng).addTo(map);
+
+  });
+
+  startRound();
+
+}
+
+/* RECENTER */
+
+function recenterFrance(){
+
+  map.setView(
+    [46.603354, 1.888334],
+    6
+  );
+
+}
+
+/* RETOUR POSITION */
+
+function resetPosition(){
+
+  if(panorama){
+
+    panorama.setPov({
+      heading:34,
+      pitch:10
+    });
+
+    panorama.setZoom(1);
+
+    panorama.setPosition(
+      realPosition
+    );
+
+  }
+
+}
+
+/* START ROUND */
+
+async function startRound(){
+
+  resultBox.style.display = "none";
+
+  roundEnded = false;
+
+  document.getElementById(
+    "controls"
+  ).style.display = "flex";
+
+  document.getElementById(
+    "reset-position-btn"
+  ).style.display = "flex";
+
+  mapContainer.classList.remove(
+    "fullscreen"
+  );
+
+  mapContainer.classList.remove(
+    "expanded"
+  );
+
+  recenterFrance();
+
+  const location =
+    await randomLocation();
+
+  realPosition =
+    new google.maps.LatLng(
+      location.lat,
+      location.lng
+    );
+
+  panorama =
+    new google.maps.StreetViewPanorama(
+      document.getElementById(
+        "street-view"
+      ),
+      {
+        position: realPosition,
+
+        pov:{
+          heading:34,
+          pitch:10
+        },
+
+        zoom:1,
+
+        addressControl:false,
+
+        fullscreenControl:false
+      }
+    );
+
+}
+
+/* VALIDATE */
+
+function validateGuess(){
+
+  if(!selectedLatLng){
+
+    alert("Clique sur la map");
+
+    return;
+  }
+
+  const guess =
+    new google.maps.LatLng(
+      selectedLatLng.lat,
+      selectedLatLng.lng
+    );
+
+  const distance =
+    google.maps.geometry
+    .spherical
+    .computeDistanceBetween(
+      realPosition,
+      guess
+    );
+
+  const distanceKm =
+    (distance / 1000).toFixed(2);
+
+if(multiplayer){
+
+  if(hasValidated){
+    return;
+  }
+
+  hasValidated = true;
+
+  db.ref(
+    "rooms/" + currentRoom +
+    "/guesses/" + playerName
+  ).set({
+
+    distance: distanceKm,
+
+    lat: selectedLatLng.lat,
+
+    lng: selectedLatLng.lng
+
+  });
+
+  document.querySelector(
+  '#controls button:last-child'
+).style.display = "none";
+
+  waitAllPlayers();
+
+  return;
+
+}
+
+  roundEnded = true;
+
+  /* FULLSCREEN */
+
+  mapContainer.classList.add(
+    "fullscreen"
+  );
+
+  document.getElementById(
+    "controls"
+  ).style.display = "none";
+
+  document.getElementById(
+    "reset-position-btn"
+  ).style.display = "none";
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 500);
+
+  /* BON POINT */
+
+  realMarker = L.circleMarker([
+    realPosition.lat(),
+    realPosition.lng()
+  ], {
+
+    radius:10,
+
+    color:"green",
+
+    fillColor:"green",
+
+    fillOpacity:1
+
+  }).addTo(map);
+
+  /* LIGNE */
+
+  line = L.polyline([
+    [
+      selectedLatLng.lat,
+      selectedLatLng.lng
+    ],
+    [
+      realPosition.lat(),
+      realPosition.lng()
+    ]
+  ]).addTo(map);
+
+  /* ZOOM */
+
+  map.fitBounds(
+    line.getBounds(),
+    {
+      padding:[100,100]
+    }
+  );
+
+  /* DISTANCE */
+
+  distanceText.innerHTML =
+    "Bravo : " +
+    distanceKm +
+    " km";
+
+  resultBox.style.display =
+    "block";
+
+}
+
+function waitAllPlayers(){
+
+  db.ref(
+    "rooms/" + currentRoom
+  ).on("value", (snapshot) => {
+
+    const room =
+      snapshot.val();
+
+    if(
+      !room.players ||
+      !room.guesses
+    ) return;
+
+    const totalPlayers =
+      Object.keys(
+        room.players
+      ).length;
+
+    const totalGuesses =
+      Object.keys(
+        room.guesses
+      ).length;
+
+    if(totalPlayers === totalGuesses && !resultShown){
+
+      let bestDistance = Infinity;
+
+      for(let name in room.guesses){
+
+        const dist =
+          parseFloat(
+            room.guesses[name].distance
+          );
+
+        if(dist < bestDistance){
+
+          bestDistance = dist;
+
+        }
+
+      }
+
+      resultShown = true;
+      showTeamResult(
+        room.guesses,
+        bestDistance
+      );
+
+    }
+
+  });
+
+}
+
+function showTeamResult(guesses, distance){
+
+  roundEnded = true;
+
+  mapContainer.classList.add(
+    "fullscreen"
+  );
+
+  resultBox.style.display =
+    "block";
+
+if(isHost){
+
+  if(currentRound >= maxRounds){
+
+    document.getElementById(
+      "continue-btn"
+    ).innerHTML =
+      "Terminer";
+
+  } else {
+
+    document.getElementById(
+      "continue-btn"
+    ).innerHTML =
+      "Continuer";
+
+  }
+
+  document.getElementById(
+    "continue-btn"
+  ).style.display = "block";
+
+} else {
+
+  document.getElementById(
+    "continue-btn"
+  ).style.display = "none";
+
+}
+
+  /* CACHE BOUTONS */
+
+  document.getElementById(
+    "controls"
+  ).style.display = "none";
+
+  document.getElementById(
+    "reset-position-btn"
+  ).style.display = "none";
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 500);
+
+  /* TEXTE */
+
+  distanceText.innerHTML =
+    "Bravo : " +
+    distance +
+    " km";
+
+  /* POINT VERT */
+
+  realMarker = L.circleMarker([
+    realPosition.lat(),
+    realPosition.lng()
+  ], {
+
+    radius:10,
+
+    color:"green",
+
+    fillColor:"green",
+
+    fillOpacity:1
+
+  }).addTo(map);
+
+  /* TOUS LES JOUEURS */
+
+if(playerMarker){
+  map.removeLayer(playerMarker);
+}
+
+  for(let name in guesses){
+
+    const guess =
+      guesses[name];
+
+    /* POINT JOUEUR */
+
+    let marker;
+
+if(name === playerName){
+
+  marker = L.marker([
+    guess.lat,
+    guess.lng
+  ]).addTo(map);
+
+  playerMarker = marker;
+
+} else {
+
+  marker = L.marker([
+    guess.lat,
+    guess.lng
+  ]).addTo(map);
+
+}
+
+multiplayerLayers.push(marker);
+
+    /* NOM */
+
+    marker.bindTooltip(name, {
+
+      permanent:true,
+
+      direction:"top",
+
+      offset:[0, -10]
+
+    }).openTooltip();
+
+    /* LIGNE */
+
+    const playerLine =
+  L.polyline([
+    [
+      guess.lat,
+      guess.lng
+    ],
+    [
+      realPosition.lat(),
+      realPosition.lng()
+    ]
+  ]).addTo(map);
+
+multiplayerLayers.push(playerLine);
+
+  }
+
+  /* ZOOM GLOBAL */
+
+  const group = [];
+
+  for(let name in guesses){
+
+    group.push([
+      guesses[name].lat,
+      guesses[name].lng
+    ]);
+
+  }
+
+  group.push([
+    realPosition.lat(),
+    realPosition.lng()
+  ]);
+
+  map.fitBounds(group, {
+    padding:[100,100]
+  });
+
+}
+
+/* NEXT ROUND */
+
+async function nextRound(){
+
+  if(playerMarker)
+    map.removeLayer(playerMarker);
+
+  if(realMarker)
+    map.removeLayer(realMarker);
+
+  if(line)
+    map.removeLayer(line);
+
+  selectedLatLng = null;
+
+  recenterFrance();
+
+  /* SOLO */
+
+  if(!multiplayer){
+
+    startRound();
+
+    return;
+
+  }
+
+  /* MULTIJOUEUR */
+
+  if(isHost){
+
+    // FIN DE PARTIE
+
+    if(currentRound >= maxRounds){
+
+  await db.ref(
+    "rooms/" + currentRoom + "/gameEnded"
+  ).set(true);
+
+  await db.ref(
+    "rooms/" + currentRoom
+  ).remove();
+
+  return;
+
+}
+
+    // ROUND SUIVANT
+
+    currentRound++;
+
+    const location =
+      await randomLocation();
+
+    await db.ref(
+      "rooms/" + currentRoom
+    ).update({
+
+      location: location,
+
+      guesses: {},
+
+      round: currentRound
+
+    });
+
+  }
+
+}
+
+/* MENU MULTIJOUEUR */
+
+async function createRoom(){
+
+  askPlayerName();
+
+  const roomCode =
+    generateRoomCode();
+
+  currentRoom = roomCode;
+
+  isHost = true;
+
+  multiplayer = true;
+
+  await db.ref(
+  "rooms/" + roomCode
+).set({
+
+  host: playerName,
+
+  started:false,
+
+  round:1,
+
+  players:{
+    [playerName]: true
+  }
+
+});
+
+  showLobby();
+
+}
+
+async function joinRoom(){
+
+  askPlayerName();
+
+  const code = prompt(
+    "Code de la partie"
+  );
+
+  if(!code) return;
+
+  const roomRef =
+    db.ref("rooms/" + code);
+
+  const snapshot =
+    await roomRef.once("value");
+
+const roomData =
+  snapshot.val();
+
+const playerCount =
+  Object.keys(
+    roomData.players || {}
+  ).length;
+
+if(playerCount >= 5){
+
+  alert("Partie pleine");
+
+  return;
+
+}
+
+  if(snapshot.exists()){
+
+    currentRoom = code;
+
+    multiplayer = true;
+
+    await roomRef.child(
+      "players/" + playerName
+    ).set(true);
+
+if(
+  roomData.players &&
+  roomData.players[playerName]
+){
+
+  alert(
+    "Pseudo déjà utilisé"
+  );
+
+  return;
+
+}
+    showLobby();
+
+  } else {
+
+    alert("Partie introuvable");
+
+  }
+
+}
+
+function showLobby(){
+
+  document.getElementById(
+    "multiplayer-home"
+  ).style.display = "none";
+
+  document.getElementById(
+    "lobby-screen"
+  ).style.display = "block";
+
+  document.getElementById(
+    "room-code"
+  ).innerHTML =
+    currentRoom;
+
+  if(!isHost){
+
+    document.getElementById(
+      "start-game-btn"
+    ).style.display = "none";
+
+  }
+
+  listenPlayers();
+
+  listenGameStart();
+
+}
+
+function listenPlayers(){
+
+  db.ref(
+  "rooms/" + currentRoom
+).on("value", (snapshot) => {
+
+    const room =
+  snapshot.val();
+
+if(room && room.gameEnded){
+
+  gameEnded = true;
+
+}
+
+if(!room){
+
+  if(gameEnded){
+
+    alert("Partie terminée");
+
+  } else {
+
+    alert(
+      "Un joueur a quitté la partie\nLa partie a été supprimée"
+    );
+
+  }
+
+  location.reload();
+
+  return;
+
+}
+
+const players =
+  room.players;
+const host =
+  room.host;
+
+    const playersList =
+      document.getElementById(
+        "players-list"
+      );
+
+    playersList.innerHTML = "";
+
+    for(let name in players){
+
+  const div =
+    document.createElement("div");
+
+  div.className =
+    "player-item";
+
+  let tags = "";
+
+if(name === playerName){
+  tags += " (toi)";
+}
+
+if(name === host){
+  tags += " (hôte)";
+}
+
+div.innerHTML = name + tags;
+
+  playersList.appendChild(div);
+
+}
+
+  });
+
+}
+
+async function startMultiplayerGame(){
+
+  const location =
+    await randomLocation();
+
+  await db.ref(
+    "rooms/" + currentRoom
+  ).update({
+
+    started:true,
+
+    location:location
+
+  });
+
+}
+
+function listenGameStart(){
+
+  db.ref(
+    "rooms/" + currentRoom
+  ).on("value", async (snapshot) => {
+
+    const room =
+      snapshot.val();
+
+    if(!room) return;
+
+    currentRound = room.round || 1;
+
+    if(room.started && room.location){
+
+      document.getElementById(
+        "leave-room-btn"
+      ).style.display = "block";
+
+      document.getElementById(
+        "start-game-btn"
+      ).style.display = "none";
+
+      closeMultiplayerMenu();
+
+      // CLÉ UNIQUE DE LA POSITION
+
+      const locationKey =
+        room.location.lat +
+        "_" +
+        room.location.lng;
+
+      // UNIQUEMENT SI NOUVEL ENDROIT
+
+      if(locationKey !== lastLocationKey){
+
+        lastLocationKey = locationKey;
+
+        startSharedRound(
+          room.location
+        );
+
+      }
+
+    }
+
+  });
+
+}
+
+async function startSharedRound(location){
+
+  resultBox.style.display = "none";
+
+  roundEnded = false;
+
+  hasValidated = false;
+
+  resultShown = false;
+
+document.querySelector(
+  '#controls button:last-child'
+).style.display = "block";
+
+if(playerMarker)
+  map.removeLayer(playerMarker);
+
+if(realMarker)
+  map.removeLayer(realMarker);
+
+if(line)
+  map.removeLayer(line);
+
+selectedLatLng = null;
+multiplayerLayers.forEach(layer => {
+  map.removeLayer(layer);
+});
+
+multiplayerLayers = [];
+
+document.getElementById(
+  "controls"
+).style.display = "flex";
+
+document.querySelector(
+  '#controls button:last-child'
+).style.display = "block";
+
+document.getElementById(
+  "reset-position-btn"
+).style.display = "flex";
+
+mapContainer.classList.remove(
+  "fullscreen"
+);
+
+  realPosition =
+    new google.maps.LatLng(
+      location.lat,
+      location.lng
+    );
+
+  panorama =
+    new google.maps.StreetViewPanorama(
+      document.getElementById(
+        "street-view"
+      ),
+      {
+        position: realPosition,
+
+        pov:{
+          heading:34,
+          pitch:10
+        },
+
+        zoom:1,
+
+        addressControl:false,
+
+        fullscreenControl:false
+      }
+    );
+panorama.setOptions({
+  disableDefaultUI:false
+});
+
+}
+
+async function leaveRoom(){
+
+  if(!currentRoom) return;
+
+  const roomRef =
+    db.ref(
+      "rooms/" + currentRoom
+    );
+
+  // SUPPRIME DIRECTEMENT LA ROOM
+  // PEU IMPORTE QUI QUITTE
+
+  await roomRef.remove();
+
+  multiplayer = false;
+
+  currentRoom = null;
+
+  isHost = false;
+
+  closeMultiplayerMenu();
+
+  location.reload();
+
+}
+
+function openMultiplayerMenu(){
+
+  document.getElementById(
+    "multiplayer-menu"
+  ).style.display = "flex";
+
+}
+
+function closeMultiplayerMenu(){
+
+  document.getElementById(
+    "multiplayer-menu"
+  ).style.display = "none";
+
+}
+
+window.onload = initGame;
+
+</script>
+
+</body>
+</html>
