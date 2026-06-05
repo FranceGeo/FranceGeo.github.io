@@ -642,6 +642,14 @@ line-height:1.5;
 
 </div>
 
+<button
+class="multi-btn menu-btn"
+onclick="toggleMapStyle()">
+
+Changer de carte
+
+</button>
+
 </div>
 
 </div>
@@ -894,28 +902,32 @@ function toggleMap(){
 function initGame(){
 
   map = L.map('map', {
-
   zoomControl: false,
-
   maxBounds: franceBounds,
-
   maxBoundsViscosity: 1.0,
-
   minZoom: 5
+}).setView(
+  [46.603354, 1.888334],
+  6
+);
 
-  }).setView(
-    [46.603354, 1.888334],
-    6
-  );
+const carteNormale = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; OpenStreetMap contributors'
+  }
+);
 
-  L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-      attribution:
-      '&copy; OpenStreetMap contributors'
-    }
-  ).addTo(map);
+const carteSatellite = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+);
 
+carteNormale.addTo(map);
+
+window.carteNormale = carteNormale;
+window.carteSatellite = carteSatellite;
+window.modeSatellite = false;
+  
   map.on('click', function(e){
 
     // EMPÊCHE CHANGEMENT
@@ -1843,6 +1855,24 @@ function closeMultiplayerMenu(){
 
 }
 
+  function toggleMapStyle(){
+
+  if(window.modeSatellite){
+
+    map.removeLayer(window.carteSatellite);
+    window.carteNormale.addTo(map);
+
+  }else{
+
+    map.removeLayer(window.carteNormale);
+    window.carteSatellite.addTo(map);
+
+  }
+
+  window.modeSatellite = !window.modeSatellite;
+
+}
+  
 window.onload = initGame;
 
 </script>
