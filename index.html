@@ -321,6 +321,7 @@
   gap:25px;
 
 }
+
 .multi-btn{
 
   width:100%;
@@ -354,7 +355,7 @@
   opacity:1 !important;
 
 }
-    
+
 .menu-btn{
 
   background:white !important;
@@ -366,7 +367,7 @@
     0 0 0 3px white,
     0 4px 12px rgba(0,0,0,0.25);
 
-  border-radius:10px;
+  border-radius:12px;
 
   font-size:22px;
   font-weight:700;
@@ -374,7 +375,7 @@
   padding:22px;
 
 }
-    
+
 /* CROIX FERMER */
 
 #close-multiplayer{
@@ -515,12 +516,6 @@
   color:white !important;
 
 }
-
-#change-map-btn{
-
-  margin-top:10px;
-
-}
   </style>
 </head>
 <body>
@@ -646,15 +641,6 @@ line-height:1.5;
   Bonne chance.
 
 </div>
-
-<button
-id="change-map-btn"
-class="multi-btn menu-btn"
-onclick="toggleMapStyle()">
-
-  Changer de carte
-
-</button>
 
 </div>
 
@@ -922,19 +908,9 @@ function initGame(){
     6
   );
 
-const normalMap = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-);
-
-const satelliteMap = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-);
-
-let satelliteMode = false;
-
-normalMap.addTo(map);
-
-   {
+  L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
       attribution:
       '&copy; OpenStreetMap contributors'
     }
@@ -1868,24 +1844,6 @@ function closeMultiplayerMenu(){
 }
 
 window.onload = initGame;
-
-  function toggleMapStyle(){
-
-  if(satelliteMode){
-
-    map.removeLayer(satelliteMap);
-    normalMap.addTo(map);
-
-  }else{
-
-    map.removeLayer(normalMap);
-    satelliteMap.addTo(map);
-
-  }
-
-  satelliteMode = !satelliteMode;
-
-}
 
 </script>
 
