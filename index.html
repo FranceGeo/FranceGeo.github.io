@@ -1867,12 +1867,16 @@ function closeMultiplayerMenu(){
   if(window.modeSatellite){
 
     map.removeLayer(window.carteSatellite);
+    map.removeLayer(window.labels);
+
     window.carteNormale.addTo(map);
 
   }else{
 
     map.removeLayer(window.carteNormale);
+
     window.carteSatellite.addTo(map);
+    window.labels.addTo(map);
 
   }
 
