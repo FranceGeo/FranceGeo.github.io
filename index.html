@@ -926,7 +926,10 @@ const carteNormale = L.tileLayer(
 );
 
 const carteSatellite = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+  {
+    maxZoom: 20
+  }
 );
 
 carteNormale.addTo(map);
