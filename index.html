@@ -1869,9 +1869,7 @@ function closeMultiplayerMenu(){
 
   if(window.modeSatellite){
 
-    if(map.hasLayer(window.carteSatellite)){
-      map.removeLayer(window.carteSatellite);
-    }
+    map.removeLayer(window.carteSatellite);
 
     window.carteNormale.addTo(map);
 
@@ -1879,19 +1877,13 @@ function closeMultiplayerMenu(){
 
   }else{
 
-    if(map.hasLayer(window.carteNormale)){
-      map.removeLayer(window.carteNormale);
-    }
+    map.removeLayer(window.carteNormale);
 
     window.carteSatellite.addTo(map);
 
     window.modeSatellite = true;
 
   }
-
-}
-
-  window.modeSatellite = !window.modeSatellite;
 
 }
   
