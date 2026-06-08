@@ -293,7 +293,7 @@
 
 #multiplayer-content{
 
-  width:470px;
+  width:400px;
   max-width:90%;
 
   background:none;
@@ -370,82 +370,9 @@
   border-radius:8px;
 
   font-size:22px;
-  font-weight:800;
-
-  padding:12px 16px;
-
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-
-}
-
-  .direction-btn{
-
-  position:relative;
-
-  background:white !important;
-  color:black !important;
-
-  border:4px solid #222 !important;
-
-  box-shadow:0 0 0 3px white;
-
-  border-radius:8px;
-
-  font-size:20px;
   font-weight:700;
 
-  text-transform:uppercase;
-
-  padding:12px 35px 12px 16px;
-
-  text-align:center;
-
-  overflow:visible;
-
-}
-    
-/* Pointe vers la droite */
-
-.direction-btn::after{
-
-  content:"";
-
-  position:absolute;
-
-  top:50%;
-  right:-16px;
-
-  transform:translateY(-50%);
-
-  width:0;
-  height:0;
-
-  border-top:18px solid transparent;
-  border-bottom:18px solid transparent;
-  border-left:18px solid white;
-
-}
-
-/* Contour de la pointe */
-
-.direction-btn::before{
-
-  content:"";
-
-  position:absolute;
-
-  top:50%;
-  right:-23px;
-
-  transform:translateY(-50%);
-
-  width:0;
-  height:0;
-
-  border-top:25px solid transparent;
-  border-bottom:25px solid transparent;
-  border-left:25px solid #222;
+  padding:22px;
 
 }
 
@@ -657,12 +584,12 @@ onclick="closeMultiplayerMenu()">
   <!-- MENU NORMAL -->
   <div id="multiplayer-home">
 
-<button class="multi-btn direction-btn"
+<button class="multi-btn menu-btn"
 onclick="createRoom()">
   CRÉER UNE PARTIE
 </button>
 
-<button class="multi-btn direction-btn"
+<button class="multi-btn menu-btn"
 onclick="joinRoom()">
   REJOINDRE UNE PARTIE
 </button>
@@ -726,7 +653,7 @@ id="change-map-btn"
 class="multi-btn menu-btn"
 onclick="toggleMapStyle()">
 
-Changer de carte
+CHANGER DE CARTE
 
 </button>
 
